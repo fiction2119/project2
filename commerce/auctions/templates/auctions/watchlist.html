@@ -1,0 +1,14 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    
+    <ul>
+        {% for product in products %}
+            <li>{{product}}</li>
+        {% empty %}
+            <li>No Products</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'auctions:index' %}">Back to auctions</a>
+{% endblock %}

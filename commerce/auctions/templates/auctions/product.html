@@ -1,0 +1,40 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h1>{{product.title}}</h1>
+
+    <ul>
+        <li> ID: {{product.id}}</li>
+        <li> Current Price: {{product.bid}}</li>
+        <li> Description: {{product.description}}</li>
+        <li> {{product.url}}</li>
+    </ul>
+
+    {% if user.is_authenticated %}
+        <h2>Add to Watchlist</h2>
+        {% if exists %}
+            <form action="{% url 'auctions:product' product.id %}" method="post">
+                {% csrf_token %}
+            
+                <input name="remove"type="submit" value="Remove">
+            </form>
+        {% elif not exists %}
+            <form action="{% url 'auctions:product' product.id %}" method="post" name="add">
+                {% csrf_token %}
+            
+                <input name="add" type="submit" value="Add">
+            </form>
+        {% endif %}
+
+        <h2>Bid</h2>
+        <form action="{% url 'auctions:product' product.id %}" method="post" name="bid">
+            {% csrf_token %}
+            <input name="value" type="number" value="Bid" placeholder="Make a bid">
+            <input name="bid" type="submit" value="Bid">
+        </form>
+        Highest Bid: {{ highest_bid }}€
+
+    {% endif %}
+        
+    <a href="{% url 'auctions:index' %}">Back to auctions</a>
+{% endblock %}
