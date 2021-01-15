@@ -99,13 +99,12 @@ def product(request, product_id):
     listing = Listing.objects.get(pk=product_id)
     username = Username(username=request.user.username)
     exists = Username.objects.filter(username=request.user.username, product=listing).all()
-
+    
     if request.method == "POST":
         if exists:
             if "remove" in request.POST:
                 print("removing..." + str(exists))
                 exists.delete()
-                
             if "add" in request.POST:
                 return HttpResponse("Error: Couldn't remove product.")
         elif not exists:
@@ -115,37 +114,39 @@ def product(request, product_id):
                 username.product.add(listing)
             if "remove" in request.POST:
                 return HttpResponse("Error: Couldn't add product.")
-
-        bid = Bid.objects.get(title=listing.title)
+        #################################################
         highest_bid = str(listing.bid)
         highest_bid = int(highest_bid)
         
-        if "bid" in request.POST:
-            if int(request.POST["value"]) > highest_bid:
-                bid.bid.add(request.POST["value"])
+        try:
+            user_bid = int(request.POST["value"])
+        except ValueError:
+            return HttpResponse("Couldn't make a bid on the product. Enter a valid bid.")
         
+        bid = Bid(title=listing.title, offer=user_bid)
         
+        if bid:
+            if "bid" in request.POST:
+                if user_bid > highest_bid:
+                    print("User bid: " + str(user_bid))
+                    print("Highest bid: " + str(highest_bid))
+                    print("bid: " + str(bid))
+                    print("title: " + str(listing.title))
+                    print("Saving...")
+                    bid.save() 
+                    listing.bid.add(bid)
+                else:
+                    return HttpResponse("Your bid must be superior to the highest bid.")
+        #elif not bid:
+            #bid.save()
         
-        return HttpResponseRedirect(reverse("auctions:product", args=(product_id,)))
+            return HttpResponseRedirect(reverse("auctions:product", args=(product_id,)))
             
     return render(request, "auctions/product.html", {
         "product": listing,
         "exists":exists,
         "highest_bid": listing.bid,
     })
-
-def bid(request, product_id):
-    if request.method == "POST":
-        
-        
-        
-        return render(request, "auctions/product.html",{
-            "highest_bid": listing.bid
-        },)
-    
-    return render(request, "auctions/product.html", {
-        "highest_bid": listing.bid
-    }, args=(product_id,) )
 
 def watchlist(request):
     print(str(Username.objects.filter(username=request.user.username).all()))

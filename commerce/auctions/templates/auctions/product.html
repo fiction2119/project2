@@ -33,8 +33,10 @@
             <input name="bid" type="submit" value="Bid">
         </form>
         Highest Bid: {{ highest_bid }}€
+        {{ message }}
 
     {% endif %}
+
         
     <a href="{% url 'auctions:index' %}">Back to auctions</a>
 {% endblock %}

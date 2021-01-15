@@ -19,14 +19,14 @@ class Comment(models.Model):
 
 class Bid(models.Model):
     title = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="name")
-    bid = models.IntegerField(default=0)
+    offer = models.IntegerField()
 
     def __str__(self):
         return f"{self.bid}"
 
 class Listing(models.Model):
     title = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="title")
-    bid = models.ForeignKey(Bid, on_delete=models.CASCADE, related_name="initial", default=0)
+    bid = models.ForeignKey(Bid, on_delete=models.CASCADE, related_name="initial")
     description = models.CharField(max_length=300)
     url = models.CharField(max_length=200)
 
