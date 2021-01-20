@@ -1,13 +1,13 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h1>{{product.title}}</h1>
+    <h2>{{listing.title}}</h2>
 
     <ul>
-        <li> ID: {{product.id}}</li>
-        <li> Current Price: {{product.bid}}</li>
-        <li> Description: {{product.description}}</li>
-        <li> {{product.url}}</li>
+        <li> ID: {{listing.id}}</li>
+        <li> Current Price: {{listing.bid}}</li>
+        <li> Description: {{listing.description}}</li>
+        <li> {{listing.url}}</li>
     </ul>
 
     {% if user.is_authenticated %}

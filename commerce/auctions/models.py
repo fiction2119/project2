@@ -17,21 +17,13 @@ class Comment(models.Model):
     def __str__(self):
         return f"{self.comment}"
 
-class Bid(models.Model):
-    title = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="name")
-    offer = models.IntegerField()
-
-    def __str__(self):
-        return f"{self.bid}"
-
 class Listing(models.Model):
     title = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="title")
-    bid = models.ForeignKey(Bid, on_delete=models.CASCADE, related_name="initial")
     description = models.CharField(max_length=300)
     url = models.CharField(max_length=200)
 
     def __str__(self):
-        return f"{self.title} | {self.bid} | {self.description} | {self.url}"
+        return f"{self.title} | {self.description} | {self.url}"
     
 class Username(models.Model):
     username = models.CharField(max_length=56)
@@ -39,4 +31,11 @@ class Username(models.Model):
 
     def __str__(self):
         return f"{self.username}"
-    
+
+class Bid(models.Model):
+    title = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="name")
+    initial = models.IntegerField(default=None)
+    offer = models.ManyToManyField(Listing, blank=True, related_name="bid")
+
+    def __str__(self):
+        return f"{self.offer}"

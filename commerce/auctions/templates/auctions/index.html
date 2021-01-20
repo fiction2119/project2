@@ -5,7 +5,7 @@
 
     <ul>
         {% for listing in listings %}
-            <li> <a href="{%url 'auctions:product' listing.id %}">Title: {{listing.title}} | Description: {{listing.description}} | Current price: {{listing.bid}}€  </a></li> 
+            <li> <a href="{%url 'auctions:product' listing.id %}">Title: {{listing.title}} | Description: {{listing.description}} | Initial price: {{listing.initial}}€  </a></li> 
         {% endfor %}
     </ul>
 {% endblock %}
