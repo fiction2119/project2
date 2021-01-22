@@ -4,8 +4,9 @@
     <h2>Active Listings</h2>
 
     <ul>
-        {% for listing in listings %}
-            <li> <a href="{%url 'auctions:product' listing.id %}">Title: {{listing.title}} | Description: {{listing.description}} | Initial price: {{listing.initial}}€  </a></li> 
+        {% for product in products %}
+            <li> <a href="{%url 'auctions:product' product.id %}">Title: {{product.title}} | Description: {{product.description}} | {{product.url}} | Current price: {{product.initial_bid}}€ 
+            </a></li> 
         {% endfor %}
     </ul>
 {% endblock %}

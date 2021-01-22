@@ -5,37 +5,28 @@ class User(AbstractUser):
     pass
 
 class Product(models.Model):
-    product = models.CharField(max_length=70)
-
-    def __str__(self):
-        return f"{self.product}"
-
-class Comment(models.Model):
-    title = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="heading")
-    comment = models.CharField(max_length=300)
-
-    def __str__(self):
-        return f"{self.comment}"
-
-class Listing(models.Model):
-    title = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="title")
+    title = models.CharField(max_length=70)
     description = models.CharField(max_length=300)
     url = models.CharField(max_length=200)
+    initial_bid = models.IntegerField()
 
     def __str__(self):
-        return f"{self.title} | {self.description} | {self.url}"
-    
-class Username(models.Model):
-    username = models.CharField(max_length=56)
-    product = models.ManyToManyField(Listing, blank=True, related_name="users")
-
-    def __str__(self):
-        return f"{self.username}"
+        return f" Product: {self.title} | {self.description} | {self.url} | {self.initial_bid} "
 
 class Bid(models.Model):
-    title = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="name")
-    initial = models.IntegerField(default=None)
-    offer = models.ManyToManyField(Listing, blank=True, related_name="bid")
+    initial_bid = models.IntegerField()
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="listing")
+    offer = models.ManyToManyField(Product, blank=True, related_name="bids")
 
     def __str__(self):
-        return f"{self.offer}"
+        return f"Bid: {self.product} | {self.initial_bid}"
+
+class Username(models.Model):
+    username = models.CharField(max_length=56)
+    product = models.ManyToManyField(Product, blank=True, related_name="users")
+
+    def __str__(self):
+        return f"{self.username} | {self.product}"
+
+class Comment(models.Model):
+    commentary = models.ManyToManyField(Product, blank=True, related_name="comments")
