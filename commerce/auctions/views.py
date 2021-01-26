@@ -78,6 +78,7 @@ def create(request):
         product = Product(title=title, description=description, url=url, initial_bid=initial)
         product.save()
         
+        # TODO: Current price changes in template.
         return render(request, "auctions/index.html", {
             "products": Product.objects.all(),
         })
@@ -87,40 +88,53 @@ def create(request):
 
 def product(request, product_id):
     product = Product.objects.get(pk=product_id)
-    username = Username(username=request.user.username)
-    exists = Username.objects.filter(username=request.user.username, product=product).all()
-    
+    username = Username(username=request.user.username, )
     highest_bid = 0
+    username_check = Username.objects.filter(username=request.user.username)
     
+    # Check if username exists, if not save the username provided
+    if not username_check:
+        print("saving username...")
+        username.save()
+
+    bid = Bid(bid=highest_bid, product_id=product_id)
+    product_check = Bid.objects.filter(product_id=product_id)
+
+    if not product_check:
+        print("checking product...")
+        bid.save()
+        
     if request.method == "POST":
-        if exists:
-            if "remove" in request.POST:
-                print("removing..." + str(exists))
-                exists.delete()
-            if "add" in request.POST:
-                return HttpResponse("Error: Couldn't remove product.")
-        elif not exists:
-            if "add" in request.POST:
-                print("adding...")
-                username.save() 
-                username.product.add(product)
-            if "remove" in request.POST:
-                return HttpResponse("Error: Couldn't add product.")
+        title = product.title
+        
+        if "add" in request.POST:
+            print(str(product_check))
+        #if exists:
+            #if "remove" in request.POST:
+                #print("removing..." + str(exists))
+                #exists.delete()
+            #if "add" in request.POST:
+                #return HttpResponse("Error: Couldn't remove product.")
+        #elif not exists:
+            #if "add" in request.POST:
+                #print("adding..." + str(exists))
+                #username.save() 
+                #username.product.add(product)
+            #if "remove" in request.POST:
+                #return HttpResponse("Error: Couldn't add product.")
             
         # Gets the value provided by the user on the request, if value isn't valid it returns an error
-        try:
-            user_bid = int(request.POST["value"])
-        except ValueError:
-            return HttpResponse("Couldn't make a bid on the product. Enter a valid bid.")
+        if "value" in request.POST:
+            try:
+                user_bid = int(request.POST["value"])
+            except ValueError:
+                return HttpResponse("Couldn't make a bid on the product. Enter a valid bid.")
 
         
-
-        if "bid" in request.POST:
-            pass
-            
+    # TODO: Fix current price.
     return render(request, "auctions/product.html", {
         "product": product,
-        "exists":exists,
+        
         "highest_bid": highest_bid,
     })
 

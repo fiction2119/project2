@@ -14,19 +14,18 @@ class Product(models.Model):
         return f" Product: {self.title} | {self.description} | {self.url} | {self.initial_bid} "
 
 class Bid(models.Model):
-    initial_bid = models.IntegerField()
+    bid = models.IntegerField()
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="listing")
-    offer = models.ManyToManyField(Product, blank=True, related_name="bids")
 
     def __str__(self):
-        return f"Bid: {self.product} | {self.initial_bid}"
+        return f"{self.bid} | {self.product}"
 
 class Username(models.Model):
     username = models.CharField(max_length=56)
-    product = models.ManyToManyField(Product, blank=True, related_name="users")
+    bids = models.ManyToManyField(Bid, blank=True, related_name="users")
 
     def __str__(self):
-        return f"{self.username} | {self.product}"
+        return f"{self.username}"
 
 class Comment(models.Model):
     commentary = models.ManyToManyField(Product, blank=True, related_name="comments")
