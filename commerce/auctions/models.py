@@ -9,6 +9,7 @@ class Product(models.Model):
     description = models.CharField(max_length=300)
     url = models.CharField(max_length=200)
     initial_bid = models.IntegerField()
+    watchlist = models.BooleanField(default=False)
 
     def __str__(self):
         return f" Product: {self.title} | {self.description} | {self.url} | {self.initial_bid} "
@@ -23,6 +24,7 @@ class Bid(models.Model):
 class Username(models.Model):
     username = models.CharField(max_length=56)
     bids = models.ManyToManyField(Bid, blank=True, related_name="users")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="users")
 
     def __str__(self):
         return f"{self.username}"

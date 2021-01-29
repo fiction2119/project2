@@ -11,7 +11,7 @@ from .models import User, Bid, Comment, Product, Username
 def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("auctions:login"))
-
+    
     return render(request, "auctions/index.html",   {
         "products": Product.objects.all(),
     })  
@@ -88,54 +88,48 @@ def create(request):
 
 def product(request, product_id):
     product = Product.objects.get(pk=product_id)
-    username = Username(username=request.user.username, )
-    highest_bid = 0
-    username_check = Username.objects.filter(username=request.user.username)
     
-    # Check if username exists, if not save the username provided
+    # Check if current logged in username exists, if not save it
+    if Username.objects.filter(username=request.user.username):
+        username = Username.objects.get(username=request.user.username)
+    else:
+        username = Username(username=request.user.username)
+    
+    username_check = Username.objects.filter(username=request.user.username)   
     if not username_check:
         print("saving username...")
-        username.save()
-
-    bid = Bid(bid=highest_bid, product_id=product_id)
-    product_check = Bid.objects.filter(product_id=product_id)
-
-    if not product_check:
-        print("checking product...")
-        bid.save()
-        
+        username.save() # Username saved
+    
+    # Get highest bid
+    highest_bid = product.initial_bid
+    bids = Bid.objects.filter(product_id=product_id)
+    for bid in bids:
+        if bid.bid > highest_bid:
+            highest_bid = bid.bid
+    
     if request.method == "POST":
-        title = product.title
-        
-        if "add" in request.POST:
-            print(str(product_check))
-        #if exists:
-            #if "remove" in request.POST:
-                #print("removing..." + str(exists))
-                #exists.delete()
-            #if "add" in request.POST:
-                #return HttpResponse("Error: Couldn't remove product.")
-        #elif not exists:
-            #if "add" in request.POST:
-                #print("adding..." + str(exists))
-                #username.save() 
-                #username.product.add(product)
-            #if "remove" in request.POST:
-                #return HttpResponse("Error: Couldn't add product.")
-            
-        # Gets the value provided by the user on the request, if value isn't valid it returns an error
-        if "value" in request.POST:
-            try:
-                user_bid = int(request.POST["value"])
-            except ValueError:
-                return HttpResponse("Couldn't make a bid on the product. Enter a valid bid.")
+        bid = Bid(bid=product.initial_bid,product_id=product_id)
 
+        # Check if a bid exists in bid table, if not save the initial bid
+        if not bid:
+            print("checking product...")
+            bid.save() # Initial bid saved
+
+        # Check if value provided by user is higher than the highest bid
+        if "value" in request.POST:
+            user_bid = int(request.POST["value"])
+            if user_bid > highest_bid:
+                highest_bid = user_bid
+            else:
+                return HttpResponse("Bid must be higher than highest bid!")
         
-    # TODO: Fix current price.
+        
+        
+       
     return render(request, "auctions/product.html", {
         "product": product,
-        
         "highest_bid": highest_bid,
+
     })
 
 def watchlist(request):
