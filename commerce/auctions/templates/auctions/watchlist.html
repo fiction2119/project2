@@ -3,8 +3,8 @@
 {% block body %}
     
     <ul>
-        {% for product in products %}
-            <li>{{product}}</li>
+        {% for object in watchlist %}
+            <li>{{object}}</li>
         {% empty %}
             <li>No Products</li>
         {% endfor %}

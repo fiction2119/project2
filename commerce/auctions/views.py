@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Bid, Comment, Product, Username
+from .models import User, Bid, Comment, Product, Username, Watchlist
 
 def index(request):
     if not request.user.is_authenticated:
@@ -75,7 +75,7 @@ def create(request):
         initial = request.POST["initial"]
         url = request.POST["url"]
         
-        product = Product(title=title, description=description, url=url, initial_bid=initial)
+        product = Product(title=title, description=description, url=url, initial_bid=initial,seller=request.user.username)
         product.save()
         
         # TODO: Current price changes in template.
@@ -89,24 +89,32 @@ def create(request):
 def product(request, product_id):
     product = Product.objects.get(pk=product_id)
     
+    
+    
+
     # Check if current logged in username exists, if not save it
     if Username.objects.filter(username=request.user.username):
         username = Username.objects.get(username=request.user.username)
     else:
-        username = Username(username=request.user.username)
+        username = Username(username=request.user.username, product_id=product_id)
+        username.save()
     
-    username_check = Username.objects.filter(username=request.user.username)   
-    if not username_check:
-        print("saving username...")
-        username.save() # Username saved
-    
+    listing_check = Watchlist.objects.filter(username=username, product=product)
+
     # Get highest bid
     highest_bid = product.initial_bid
     bids = Bid.objects.filter(product_id=product_id)
     for bid in bids:
         if bid.bid > highest_bid:
             highest_bid = bid.bid
-    
+
+    if request.user.username == product.seller:
+        seller = True
+    else:
+        seller = False
+    if not seller:
+        #TODO
+
     if request.method == "POST":
         bid = Bid(bid=product.initial_bid,product_id=product_id)
 
@@ -122,18 +130,42 @@ def product(request, product_id):
                 highest_bid = user_bid
             else:
                 return HttpResponse("Bid must be higher than highest bid!")
-        
-        
-        
-       
+
     return render(request, "auctions/product.html", {
         "product": product,
         "highest_bid": highest_bid,
-
+        "listing_check": listing_check,
+        "seller": seller
     })
 
+def watch(request, product_id):
+    if request.method == "POST":
+        # Get objects for watchlist
+        product = Product.objects.get(pk=product_id)
+        username = Username.objects.get(username=request.user.username)
+
+        # Make object for watchlist
+        listing = Watchlist(username=username, product=product)
+
+        # Check if listing is already on watchlist
+        listing_check = Watchlist.objects.filter(username=username, product=product)
+        
+        if listing_check:
+            if "add" in request.POST:
+                listing.save()
+            else:
+                listing_check.delete()
+        else:
+            if "add" in request.POST:
+                listing.save()
+
+        return HttpResponseRedirect(reverse("auctions:product", args=(product_id,)))
+
 def watchlist(request):
+    username = Username.objects.get(username=request.user.username)
+    watchlist = Watchlist.objects.filter(username=username)
+
     return render(request, "auctions/watchlist.html", {
-        "products": None,
+        "watchlist": watchlist,
     })
 

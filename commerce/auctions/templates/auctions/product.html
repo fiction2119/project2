@@ -12,14 +12,14 @@
 
     {% if user.is_authenticated %}
         <h2>Add to Watchlist</h2>
-        {% if exists %}
-            <form action="{% url 'auctions:product' product.id %}" method="post">
+        {% if listing_check %}
+            <form action="{% url 'auctions:watch' product.id %}" method="post">
                 {% csrf_token %}
             
                 <input name="remove"type="submit" value="Remove">
             </form>
-        {% elif not exists %}
-            <form action="{% url 'auctions:product' product.id %}" method="post" name="add">
+        {% elif not listing_check %}
+            <form action="{% url 'auctions:watch' product.id %}" method="post" name="add">
                 {% csrf_token %}
             
                 <input name="add" type="submit" value="Add">
@@ -34,7 +34,12 @@
         </form>
         Highest Bid: {{ highest_bid }}€
         
-
+        {% if seller %}
+            <form action="{% url 'auctions:watch' product.id %}" method="post">
+                {% csrf_token %}
+                <input name="close "type="submit" value="Close Auction">
+            </form>
+        {% endif %}
     {% endif %}
 
         
