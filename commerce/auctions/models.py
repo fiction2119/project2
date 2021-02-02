@@ -10,7 +10,6 @@ class Product(models.Model):
     url = models.CharField(max_length=200)
     initial_bid = models.IntegerField()
     seller = models.CharField(max_length=56)
-    highest_bidder = models.CharField(max_length=56, blank=True)
 
     def __str__(self):
         return f" {self.title}: {self.description}"
@@ -36,6 +35,18 @@ class Watchlist(models.Model):
     
     def __str__(self):
         return f"{self.product}"
-        
+
+class Transaction(models.Model):
+    highest_bid = models.IntegerField()
+    username = models.ForeignKey(Username, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Winner: {self.username} Price: {self.highest_bid} {self.product}"
+    
 class Comment(models.Model):
-    commentary = models.ManyToManyField(Product, blank=True, related_name="comments")
+    comment = models.CharField(max_length=250)
+    username = models.ForeignKey(Username, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.username}: {self.comment}"

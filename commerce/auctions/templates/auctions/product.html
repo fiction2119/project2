@@ -11,35 +11,52 @@
     </ul>
 
     {% if user.is_authenticated %}
-        <h2>Add to Watchlist</h2>
-        {% if listing_check %}
-            <form action="{% url 'auctions:watch' product.id %}" method="post">
-                {% csrf_token %}
+        {% if not closed %}
+            <h2>Add to Watchlist</h2>
+            {% if listing_check %}
+                <form action="{% url 'auctions:watch' product.id %}" method="post">
+                    {% csrf_token %}
             
-                <input name="remove"type="submit" value="Remove">
-            </form>
-        {% elif not listing_check %}
-            <form action="{% url 'auctions:watch' product.id %}" method="post" name="add">
-                {% csrf_token %}
+                    <input name="remove"type="submit" value="Remove">
+                </form>
+            {% elif not listing_check %}
+                <form action="{% url 'auctions:watch' product.id %}" method="post" name="add">
+                    {% csrf_token %}
             
-                <input name="add" type="submit" value="Add">
-            </form>
-        {% endif %}
+                    <input name="add" type="submit" value="Add">
+                </form>
+            {% endif %}
 
-        <h2>Bid</h2>
-        <form action="{% url 'auctions:product' product.id %}" method="post" name="bid">
+            <h2>Bid</h2>
+            <form action="{% url 'auctions:product' product.id %}" method="post" name="bid">
             {% csrf_token %}
-            <input name="value" type="number" value="Bid" placeholder="Make a bid">
-            <input name="bid" type="submit" value="Bid">
-        </form>
-        Highest Bid: {{ highest_bid }}€
-        
-        {% if seller %}
-            <form action="{% url 'auctions:watch' product.id %}" method="post">
-                {% csrf_token %}
-                <input name="close "type="submit" value="Close Auction">
+                <input name="value" type="number" value="Bid" placeholder="Make a bid">
+                <input name="bid" type="submit" value="Bid">
             </form>
+            Highest Bid: {{ highest_bid }}€
+        
+            {% if seller %}
+                <form action="{% url 'auctions:product' product.id %}" method="post">
+                {% csrf_token %}
+                    <input name="close"type="submit" value="Close Auction">
+                </form>
+            {% endif %}
+        {% else %}
+            <p>Auction Closed! Winner: {{ transaction.username }} Price: {{ transaction.highest_bid }}€ </p>
         {% endif %}
+        
+        <h4>    Comment Section  </h4>
+        {% for comment in comments %}
+            <p>{{comment.username}}: {{comment.comment}}</p>
+        {% empty %}
+            <p>No comments made so far, be the first:</p>
+        {% endfor %}
+
+        <form action="{% url 'auctions:product' product.id %}" method="post">
+        {% csrf_token %}
+            <input name="comment"type="textarea" >
+            <input name="submit"type="submit" value="Submit">
+        </form>
     {% endif %}
 
         

@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Bid, Comment, Product, Username, Watchlist
+from .models import Transaction, User, Bid, Comment, Product, Username, Watchlist
 
 def index(request):
     if not request.user.is_authenticated:
@@ -90,8 +90,14 @@ def product(request, product_id):
     product = Product.objects.get(pk=product_id)
     
     
-    
 
+    # Check if current user is the seller of the product
+    if request.user.username == product.seller:
+        seller = True
+    else:
+        seller = False
+    
+    
     # Check if current logged in username exists, if not save it
     if Username.objects.filter(username=request.user.username):
         username = Username.objects.get(username=request.user.username)
@@ -99,6 +105,7 @@ def product(request, product_id):
         username = Username(username=request.user.username, product_id=product_id)
         username.save()
     
+    # Check if product is present in watchlist or not
     listing_check = Watchlist.objects.filter(username=username, product=product)
 
     # Get highest bid
@@ -108,12 +115,13 @@ def product(request, product_id):
         if bid.bid > highest_bid:
             highest_bid = bid.bid
 
-    if request.user.username == product.seller:
-        seller = True
+    # Check if product has already been closed by seller
+    transaction = Transaction.objects.filter(highest_bid=highest_bid,product=product)
+    if not transaction:
+        closed = False
     else:
-        seller = False
-    if not seller:
-        #TODO
+        closed = True
+        transaction = Transaction.objects.get(highest_bid=highest_bid,product=product)
 
     if request.method == "POST":
         bid = Bid(bid=product.initial_bid,product_id=product_id)
@@ -131,11 +139,26 @@ def product(request, product_id):
             else:
                 return HttpResponse("Bid must be higher than highest bid!")
 
+        if "close" in request.POST and not transaction:
+            transaction = Transaction(highest_bid=highest_bid,username=username,product=product)
+            transaction.save()
+            closed = True
+        
+        if "comment" in request.POST:
+            comment = Comment(comment=request.POST["comment"], username=username)
+            comment.save()
+        
+        # TODO: Image support and Categories
+        
+
     return render(request, "auctions/product.html", {
         "product": product,
         "highest_bid": highest_bid,
         "listing_check": listing_check,
-        "seller": seller
+        "seller": seller,
+        "closed": closed,
+        "transaction": transaction,
+        "comments": Comment.objects.all(),
     })
 
 def watch(request, product_id):
@@ -168,4 +191,7 @@ def watchlist(request):
     return render(request, "auctions/watchlist.html", {
         "watchlist": watchlist,
     })
+
+
+
 
