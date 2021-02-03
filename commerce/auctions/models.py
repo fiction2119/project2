@@ -7,16 +7,16 @@ class User(AbstractUser):
 class Product(models.Model):
     title = models.CharField(max_length=70)
     description = models.CharField(max_length=300)
-    url = models.CharField(max_length=200)
+    url = models.ImageField(upload_to="products", blank=True)
     initial_bid = models.IntegerField()
     seller = models.CharField(max_length=56)
-
+    
     def __str__(self):
         return f" {self.title}: {self.description}"
 
 class Bid(models.Model):
     bid = models.IntegerField()
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="listing")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,related_name="listing")
 
     def __str__(self):
         return f"{self.bid} | {self.product}"
@@ -50,3 +50,15 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.username}: {self.comment}"
+
+class Categorie(models.Model):
+    categories = models.CharField(max_length=56)
+    def __str__(self):
+        return f"{self.categories}"
+
+class Category(models.Model):
+    products = models.ManyToManyField(Product, related_name="categories")
+    category = models.ForeignKey(Categorie, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.category}"

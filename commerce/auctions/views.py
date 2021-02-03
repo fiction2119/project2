@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import Transaction, User, Bid, Comment, Product, Username, Watchlist
+from .models import Transaction, User, Bid, Comment, Product, Username, Watchlist, Category, Categorie
 
 def index(request):
     if not request.user.is_authenticated:
@@ -74,9 +74,16 @@ def create(request):
         description = request.POST["content"]
         initial = request.POST["initial"]
         url = request.POST["url"]
-        
+        category = request.POST["category"]
+
+        category = Category(category=category)
+        category.save()
+
         product = Product(title=title, description=description, url=url, initial_bid=initial,seller=request.user.username)
         product.save()
+
+        category.product.add(product)
+
         
         # TODO: Current price changes in template.
         return render(request, "auctions/index.html", {
@@ -89,8 +96,6 @@ def create(request):
 def product(request, product_id):
     product = Product.objects.get(pk=product_id)
     
-    
-
     # Check if current user is the seller of the product
     if request.user.username == product.seller:
         seller = True
@@ -148,9 +153,9 @@ def product(request, product_id):
             comment = Comment(comment=request.POST["comment"], username=username)
             comment.save()
         
-        # TODO: Image support and Categories
+        # TODO: Categories
         
-
+        
     return render(request, "auctions/product.html", {
         "product": product,
         "highest_bid": highest_bid,
@@ -159,6 +164,7 @@ def product(request, product_id):
         "closed": closed,
         "transaction": transaction,
         "comments": Comment.objects.all(),
+        "categories": Categorie.objects.all(),
     })
 
 def watch(request, product_id):
