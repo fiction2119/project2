@@ -4,12 +4,20 @@ from django.db import models
 class User(AbstractUser):
     pass
 
+
+class Category(models.Model):
+    category = models.CharField(max_length=56)
+
+    def __str__(self):
+        return f"{self.category}"
+
 class Product(models.Model):
     title = models.CharField(max_length=70)
     description = models.CharField(max_length=300)
     url = models.ImageField(upload_to="products", blank=True)
     initial_bid = models.IntegerField()
     seller = models.CharField(max_length=56)
+    category = models.ForeignKey(Category,on_delete=models.CASCADE)
     
     def __str__(self):
         return f" {self.title}: {self.description}"
@@ -24,7 +32,7 @@ class Bid(models.Model):
 class Username(models.Model):
     username = models.CharField(max_length=56)
     bids = models.ManyToManyField(Bid, blank=True, related_name="users")
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="users")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="users", null=True)
 
     def __str__(self):
         return f"{self.username}"
@@ -50,15 +58,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.username}: {self.comment}"
-
-class Categorie(models.Model):
-    categories = models.CharField(max_length=56)
-    def __str__(self):
-        return f"{self.categories}"
-
-class Category(models.Model):
-    products = models.ManyToManyField(Product, related_name="categories")
-    category = models.ForeignKey(Categorie, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.category}"

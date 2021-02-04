@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import Transaction, User, Bid, Comment, Product, Username, Watchlist, Category, Categorie
+from .models import Transaction, User, Bid, Comment, Product, Username, Watchlist, Category
 
 def index(request):
     if not request.user.is_authenticated:
@@ -69,6 +69,7 @@ def register(request):
         return render(request, "auctions/register.html")
 
 def create(request):
+    
     if request.method == "POST":
         title = request.POST["title"]
         description = request.POST["content"]
@@ -76,22 +77,19 @@ def create(request):
         url = request.POST["url"]
         category = request.POST["category"]
 
-        category = Category(category=category)
-        category.save()
+        category = Category.objects.get(category=category)
 
-        product = Product(title=title, description=description, url=url, initial_bid=initial,seller=request.user.username)
+        product = Product(title=title, description=description, url=url, initial_bid=initial,seller=request.user.username, category=category)
         product.save()
-
-        category.product.add(product)
-
         
-        # TODO: Current price changes in template.
         return render(request, "auctions/index.html", {
             "products": Product.objects.all(),
-        })
+        }) 
 
     else:
-        return render(request, "auctions/create.html")
+        return render(request, "auctions/create.html", {
+            "categories": Category.objects.all(),
+        })
 
 def product(request, product_id):
     product = Product.objects.get(pk=product_id)
@@ -164,7 +162,7 @@ def product(request, product_id):
         "closed": closed,
         "transaction": transaction,
         "comments": Comment.objects.all(),
-        "categories": Categorie.objects.all(),
+        "categories": Category.objects.all(),
     })
 
 def watch(request, product_id):
@@ -192,12 +190,27 @@ def watch(request, product_id):
 
 def watchlist(request):
     username = Username.objects.get(username=request.user.username)
+    
     watchlist = Watchlist.objects.filter(username=username)
 
     return render(request, "auctions/watchlist.html", {
         "watchlist": watchlist,
     })
 
+def categories(request):
+    
+    return render(request, "auctions/categories.html", {
+        "categories": Category.objects.all(),
+    })
 
+def category(request, category_id):
+    category = Category.objects.get(pk=category_id)
+    products = Product.objects.filter(category=category)
+    
+
+    return render(request, "auctions/category.html", {
+        "category": category,
+        "products": products,
+    })
 
 
