@@ -139,6 +139,8 @@ def product(request, product_id):
             user_bid = int(request.POST["value"])
             if user_bid > highest_bid:
                 highest_bid = user_bid
+                bid = Bid(bid=highest_bid,product_id=product_id)
+                bid.save()
             else:
                 return HttpResponse("Bid must be higher than highest bid!")
 
@@ -190,8 +192,8 @@ def watch(request, product_id):
 
 def watchlist(request):
     username = Username.objects.get(username=request.user.username)
-    
     watchlist = Watchlist.objects.filter(username=username)
+    
 
     return render(request, "auctions/watchlist.html", {
         "watchlist": watchlist,
@@ -207,7 +209,6 @@ def category(request, category_id):
     category = Category.objects.get(pk=category_id)
     products = Product.objects.filter(category=category)
     
-
     return render(request, "auctions/category.html", {
         "category": category,
         "products": products,
