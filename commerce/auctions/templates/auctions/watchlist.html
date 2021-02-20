@@ -3,8 +3,8 @@
 {% block body %}
     
     <ul>
-        {% for object in watchlist %}
-            <li>{{object}}</li>
+        {% for product in watchlist %}
+            <li><a href="{%url 'auctions:product' product.id %}">{{product}}</a></li>
         {% empty %}
             <li>No Products</li>
         {% endfor %}

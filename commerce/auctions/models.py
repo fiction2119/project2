@@ -32,7 +32,7 @@ class Bid(models.Model):
 class Username(models.Model):
     username = models.CharField(max_length=56)
     bids = models.ManyToManyField(Bid, blank=True, related_name="users")
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="users", null=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="users")
 
     def __str__(self):
         return f"{self.username}"
